@@ -1,0 +1,157 @@
+all:
+  hosts:
+    10.255.200.2
+  vars:
+    ## Connection vars:
+    vcenter_server: "vctestroom.service-team.biz"
+    vcenter_user: "{{ vmware_user }}"
+    vcenter_pass: "{{ vmware_pass }}"
+    ##Provisioning vars:
+    
+    #Datacenters:
+    datacenter_name: "TestRoom-SUPERMICRO"
+    
+    #ESXi hosts:
+    esxi_host_33: "esxi-unit-33.service-team.biz"
+    esxi_host_34: "esxi-unit-34.service-team.biz"
+    esxi_host_35: "esxi-unit-35.service-team.biz"
+    
+    #Datastores:
+    datastore_33: "esxi-unit-33_LUN004_Implementation IS and Outsource"
+    datastore_34: "esxi-unit-34_LUN004_Implementation IS and Outsource"
+    datastore_35: "esxi-unit-35_LUN004_Implementation IS and Outsource"
+    
+    #VM Folders:
+    cluster1_folder: "vm/_implementation IS and Outsource/Outsource/Users/slachuzhnikov/OKD/cl01.core.local"
+    cluster2_folder: "vm/_implementation IS and Outsource/Outsource/Users/slachuzhnikov/OKD/cl02.core.local"
+    cluster3_folder: "vm/_implementation IS and Outsource/Outsource/Users/slachuzhnikov/OKD/cl03.core.local"
+    cluster4_folder: "vm/_implementation IS and Outsource/Outsource/Users/slachuzhnikov/OKD/cl04.core.local"
+    OSlynko_folder: "vm/_implementation IS and Outsource/Outsource/Users/OSlynko"
+
+    #OVF to VM deploy folders:
+    cluster1_ovffolder: "cl01.core.local"
+    cluster2_ovffolder: "cl02.core.local"
+    cluster3_ovffolder: "cl03.core.local"
+    cluster4_ovffolder: "cl04.core.local"
+
+    #Resource pools:
+    resource_pool33: "_Implementation IS and Outsource33"
+    resource_pool34: "_Implementation IS and Outsource34"
+    resource_pool35: "_Implementation IS and Outsource35"
+    
+    #VM resources vars:
+    
+    rhel_guest: ""
+    fedora_guest: "fedora64Guest"
+    iso_path: "ISO/rhcos-installer.x86_64.iso"
+    #iso_path: "ISO/fedora-coreos-32.20200809.3.0-live.x86_64.iso"
+    #ovf_template: "fedora-coreos-32.20200923.3.0-vmware.x86_64"
+    ovf_template: "rhcos-4.5.1-x86_64-vmware.x86_64"
+
+    #CPU:
+    bootstrap_cpu_count: "4"
+    bootstrap_cpu_cores_per_socket: "2"
+    master_cpu_count: "4"
+    master_cpu_cores_per_socket: "2"
+    worker_cpu_count: "8"
+    worker_cpu_cores_per_socket: "4"
+
+    #RAM:
+    bootstrap_ram_mb: "16384"
+    master_ram_mb: "16384"
+    worker_ram_mb: "32768"
+
+    #Disks
+    bootstrap_disk_size_gb: "50"
+    bootstrap_disk_type: "thin"
+    master_disk_size_gb: "200"
+    master_disk_type: "thin"
+    worker_disk_size_gb: "300"
+    worker_disk_type: "thin"
+
+    #CDROM
+    cdrom_type: "iso"
+
+    #Networks:
+    vlan_200: "200"
+    isolated01: "1051"
+    isolated02: "1052"
+    isolated03: "1053"
+    isolated04: "1054"
+
+    #Names:
+
+    ##CL01:
+    bootstrap_10: "bootstrap0.cl01.core.local"
+    master_10: "master0.cl01.core.local"
+    master_11: "master1.cl01.core.local"
+    master_12: "master2.cl01.core.local"
+    worker_10: "worker0.cl01.core.local"
+    worker_11: "worker1.cl01.core.local"
+    worker_12: "worker2.cl01.core.local"
+    worker_13: "worker3.cl01.core.local"
+    worker_14: "worker4.cl01.core.local"
+    worker_15: "worker5.cl01.core.local"
+    worker_16: "worker6.cl01.core.local"
+    worker_17: "worker7.cl01.core.local"
+
+    ##CL02:
+    bootstrap_20: "bootstrap0.cl02.core.local"
+    master_20: "master0.cl02.core.local"
+    master_21: "master1.cl02.core.local"
+    master_22: "master2.cl02.core.local"
+    worker_20: "worker0.cl02.core.local"
+    worker_21: "worker1.cl02.core.local"
+    worker_22: "worker2.cl02.core.local"
+    worker_23: "worker3.cl02.core.local"
+    worker_24: "worker4.cl02.core.local"
+    worker_25: "worker5.cl02.core.local"
+    worker_26: "worker6.cl02.core.local"
+    worker_27: "worker7.cl02.core.local"
+
+    ##CL03:
+    bootstrap_30: "bootstrap0.cl03.core.local"
+    master_30: "master0.cl03.core.local"
+    master_31: "master1.cl03.core.local"
+    master_32: "master2.cl03.core.local"
+    worker_30: "worker0.cl03.core.local"
+    worker_31: "worker1.cl03.core.local"
+    worker_32: "worker2.cl03.core.local"
+    worker_33: "worker3.cl03.core.local"
+    worker_34: "worker4.cl03.core.local"
+    worker_35: "worker5.cl03.core.local"
+    worker_36: "worker6.cl03.core.local"
+    worker_37: "worker7.cl03.core.local"
+    
+    ##CL04:
+    bootstrap_40: "bootstrap0.cl04.core.local"
+    master_40: "master0.cl04.core.local"
+    master_41: "master1.cl04.core.local"
+    master_42: "master2.cl04.core.local"
+    worker_40: "worker0.cl04.core.local"
+    worker_41: "worker1.cl04.core.local"
+    worker_42: "worker2.cl04.core.local"
+    worker_43: "worker3.cl04.core.local"
+    worker_44: "worker4.cl04.core.local"
+    worker_45: "worker5.cl04.core.local"
+    worker_46: "worker6.cl04.core.local"
+    worker_47: "worker7.cl04.core.local"
+    
+    #IP Addresses:
+    bootstrap0_ip: "192.168.255.10"
+    master0_ip: "192.168.255.20"
+    master1_ip: "192.168.255.21"
+    master2_ip: "192.168.255.22"
+    worker0_ip: "192.168.255.30"
+    worker1_ip: "192.168.255.31"
+    worker2_ip: "192.168.255.32"
+    worker3_ip: "192.168.255.33"
+    worker4_ip: "192.168.255.34"
+    worker5_ip: "192.168.255.35"
+    worker6_ip: "192.168.255.36"
+    worker7_ip: "192.168.255.37"
+   
+    #IP Addresses in regexp:
+#    master2_regexp_ip: "192\.168\.255\.22"
+#    worker5_regexp_ip: "192\.168\.255\.35"
+#    worker7_regexp_ip: "192\.168\.255\.37"

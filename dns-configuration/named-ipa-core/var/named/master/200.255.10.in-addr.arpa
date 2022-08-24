@@ -1,0 +1,65 @@
+$ORIGIN .
+$TTL 10800	; 3 hours
+200.255.10.in-addr.arpa	IN SOA	core.local. root.core.local. (
+				2021064571 ; serial
+				28800      ; refresh (8 hours)
+				7200       ; retry (2 hours)
+				2419200    ; expire (4 weeks)
+				86400      ; minimum (1 day)
+				)
+			NS	srv-ipa-core.core.local.
+			MX	10 core.local.
+			TXT	"CORE.LOCAL testroom"
+$ORIGIN 200.255.10.in-addr.arpa.
+1			PTR	CORE-VM-GW.core.local.
+$TTL 300	; 5 minutes
+116			PTR	kosov.core.local.
+152			PTR	veeam.test.local.
+153			PTR	dc.test.local.
+156			PTR	openshift-starter.core.local.
+164			PTR	rhel9-ansible.core.local.
+166			PTR	vsilenko-win2019.Absolute.local.
+175			PTR	servera.core.local.
+176			PTR	elk.core.local.
+184			PTR	sp-cimtrak.core.local.
+186			PTR	qradar-dlc.core.local.
+191			PTR	CHEBUREK.HYPER.UA.
+$TTL 10800	; 3 hours
+2			PTR	cl01.core.local.
+20			PTR	okd45-pxe.core.local.
+21			PTR	okd45-bootstrap.okd45.core.local.
+$TTL 300	; 5 minutes
+214			PTR	keycloak.core.local.
+$TTL 10800	; 3 hours
+22			PTR	okd45-master-00.okd45.core.local.
+23			PTR	okd45-master-01.okd45.core.local.
+$TTL 300	; 5 minutes
+233			PTR	WIN-452A9LP81AF.gng.info.
+$TTL 10800	; 3 hours
+24			PTR	okd45-master-02.okd45.core.local.
+$TTL 300	; 5 minutes
+242			PTR	veeam-test.core.local.
+$TTL 10800	; 3 hours
+25			PTR	okd45-node-00.okd45.core.local.
+251			PTR	awx.core.local.
+252			PTR	jenkins.core.local.
+253			PTR	tower.core.local.
+254			PTR	srv-ipa-core.core.local.
+26			PTR	okd45-node-01.okd45.core.local.
+27			PTR	okd45-node-02.okd45.core.local.
+3			PTR	cl02.core.local.
+4			PTR	cl03.core.local.
+50			PTR	zabbix-ha-web.core.local.
+51			PTR	zbx-app-node-01.core.local.
+52			PTR	zbx-app-node-02.core.local.
+53			PTR	zbx-app-node-03.core.local.
+54			PTR	zbx-db-node-01.core.local.
+55			PTR	zbx-db-node-02.core.local.
+56			PTR	zbx-db-node-03.core.local.
+57			PTR	zbx-web-node-01.core.local.
+58			PTR	zbx-web-node-02.core.local.
+59			PTR	zbx-web-node-03.core.local
+60			PTR	zabbix-ha-db.core.local.
+61			PTR	zabbix-ha-app.core.local.
+90			PTR	rhel8-repo.core.local.
+91			PTR	rhel7-repo.core.local.

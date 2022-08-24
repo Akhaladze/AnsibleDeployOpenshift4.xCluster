@@ -1,0 +1,224 @@
+---
+- hosts: localhost
+  gather_facts: no
+  vars_prompt:
+    - name: vcenter_pass
+      prompt: "oslynko@vsphere.local's password"
+
+  tasks:
+   
+   - name: Deploy Bootstrap Node VM
+     community.vmware.vmware_guest:
+       hostname: "{{ vcenter_server }}"
+       username: "{{ vcenter_user }}"
+       password: "{{ vcenter_pass }}"
+       validate_certs: no
+       name: "{{ item.vmname }}"
+       datacenter: "{{ datacenter_name }}"
+       esxi_hostname: "{{ item.esxi }}"
+       resource_pool: "{{ item.resource_pool }}"
+       folder: /{{ datacenter_name }}/{{ cluster4_folder }}
+       guest_id: "{{ fedora_guest }}"
+       cdrom:
+         type: "{{ cdrom_type }}"
+         #iso_path: "[{{ item.datastore }}] {{ iso_path }}"
+       disk:
+       - size_gb: "{{ bootstrap_disk_size_gb }}"
+         type: "{{ bootstrap_disk_type }}"
+         datastore: "{{ item.datastore }}"
+       hardware:
+         num_cpus: "{{ bootstrap_cpu_count }}"
+         num_cpu_cores_per_socket: "{{ bootstrap_cpu_cores_per_socket }}"
+         memory_mb: "{{ bootstrap_ram_mb }}"
+       networks:
+       - name: VM Network
+         vlan: "{{ isolated04 }}"
+       customization:
+         #hostname: "item.hostname"
+         state: poweredoff
+     delegate_to: localhost
+     loop:
+     - { vmname: '{{ bootstrap_40 }}', esxi: '{{ esxi_host_34 }}', datastore: '{{ datastore_34 }}', resource_pool: '{{ resource_pool34 }}' }
+   
+   
+   - name: Deploy Master and Worker nodes VM
+     community.vmware.vmware_content_deploy_ovf_template:
+       hostname: "{{ vcenter_server }}"
+       username: "{{ vcenter_user }}"
+       password: "{{ vcenter_pass }}"
+       name: "{{ item.vmname }}"
+       ovf_template: "{{ ovf_template }}"
+       datacenter: "{{ datacenter_name }}"
+       folder: "{{ cluster4_ovffolder }}"
+       resource_pool: "{{ item.resource_pool }}"
+       datastore: "{{ item.datastore }}"
+       host: "{{ item.esxi }}"
+       storage_provisioning: "thin"
+     loop:
+#      - { vmname: '{{ bootstrap_20 }}', esxi: '{{ esxi_host_34 }}', datastore: '{{ datastore_34 }}', resource_pool: '{{ resource_pool34 }}' }
+      - { vmname: '{{ master_40 }}', esxi: '{{ esxi_host_33 }}', datastore: '{{ datastore_33 }}', resource_pool: '{{ resource_pool33 }}' }
+      - { vmname: '{{ master_41 }}', esxi: '{{ esxi_host_34 }}', datastore: '{{ datastore_34 }}', resource_pool: '{{ resource_pool34 }}' }
+      - { vmname: '{{ master_42 }}', esxi: '{{ esxi_host_35 }}', datastore: '{{ datastore_35 }}', resource_pool: '{{ resource_pool35 }}' }
+      - { vmname: '{{ worker_40 }}', esxi: '{{ esxi_host_33 }}', datastore: '{{ datastore_33 }}', resource_pool: '{{ resource_pool33 }}' }
+      - { vmname: '{{ worker_41 }}', esxi: '{{ esxi_host_34 }}', datastore: '{{ datastore_34 }}', resource_pool: '{{ resource_pool34 }}' }
+      - { vmname: '{{ worker_42 }}', esxi: '{{ esxi_host_33 }}', datastore: '{{ datastore_33 }}', resource_pool: '{{ resource_pool33 }}' }
+#      - { vmname: '{{ worker_43 }}', esxi: '{{ esxi_host_34 }}', datastore: '{{ datastore_34 }}', resource_pool: '{{ resource_pool34 }}' }
+#      - { vmname: '{{ worker_44 }}', esxi: '{{ esxi_host_33 }}', datastore: '{{ datastore_33 }}', resource_pool: '{{ resource_pool33 }}' }
+#      - { vmname: '{{ worker_45 }}', esxi: '{{ esxi_host_34 }}', datastore: '{{ datastore_34 }}', resource_pool: '{{ resource_pool34 }}' }
+#      - { vmname: '{{ worker_46 }}', esxi: '{{ esxi_host_35 }}', datastore: '{{ datastore_35 }}', resource_pool: '{{ resource_pool35 }}' }
+
+
+   - name: Encoding master node ignition to base64
+     shell: 'curl 10.255.200.5:8080/master.ign | base64'
+     delegate_to: localhost
+     register: master_var
+
+   - set_fact:
+       "master_ign": "{{ master_var | json_query(query) }}"
+     vars:
+       query: "stdout"
+     delegate_to: localhost
+     
+   - name: Encoding worker node ignition to base64
+     shell: 'curl 10.255.200.5:8080/worker.ign | base64'
+     delegate_to: localhost
+     register: worker_var
+   
+   - set_fact:
+       "worker_ign": "{{ worker_var | json_query(query) }}"
+     vars:
+       query: "stdout"
+     delegate_to: localhost
+         
+
+
+  
+   - name: Modify Master and Worker VM
+     community.vmware.vmware_guest:
+       hostname: "{{ vcenter_server }}"
+       username: "{{ vcenter_user }}"
+       password: "{{ vcenter_pass }}"
+       datacenter: "{{ datacenter_name }}"
+       #esxi_hostname: "{{ item.esxi }}"
+       #resource_pool: "{{ resource_pool }}"
+       #datastore: "{{ item.datastore }}"
+       name: "{{ item.vmname }}"
+       folder: /{{ datacenter_name }}/{{ cluster4_folder }}
+       disk:
+       - size_gb: "{{ item.disk_size }}"
+         type: "{{ item.disk_type }}"
+       hardware:
+         num_cpus: "{{ item.cpu_count }}"
+         num_cpu_cores_per_socket: "{{ item.cores }}"
+         memory_mb: "{{ item.memory }}"
+       networks:
+       - name: VM Network
+         vlan: "{{ isolated04 }}"
+       vapp_properties:
+       - id: guestinfo.ignition.config.data.encoding
+         label: Ignition config data encoding
+         value: base64
+       - id: guestinfo.ignition.config.data
+         label: Ignition config data
+         value: "{{ item.ign }}"
+     delegate_to: localhost
+     loop:
+       - { vmname: '{{ master_40 }}', cpu_count: '{{ master_cpu_count }}', cores: '{{ master_cpu_cores_per_socket }}', memory: '{{ master_ram_mb }}', disk_size: '{{ master_disk_size_gb }}', disk_type: '{{ master_disk_type }}', ign: '{{ master_ign }}' } 
+       - { vmname: '{{ master_41 }}', cpu_count: '{{ master_cpu_count }}', cores: '{{ master_cpu_cores_per_socket }}', memory: '{{ master_ram_mb }}', disk_size: '{{ master_disk_size_gb }}', disk_type: '{{ master_disk_type }}', ign: '{{ master_ign }}' } 
+       - { vmname: '{{ master_42 }}', cpu_count: '{{ master_cpu_count }}', cores: '{{ master_cpu_cores_per_socket }}', memory: '{{ master_ram_mb }}', disk_size: '{{ master_disk_size_gb }}', disk_type: '{{ master_disk_type }}', ign: '{{ master_ign }}' } 
+       - { vmname: '{{ worker_40 }}', cpu_count: '{{ worker_cpu_count }}', cores: '{{ worker_cpu_cores_per_socket }}', memory: '{{ worker_ram_mb }}', disk_size: '{{ worker_disk_size_gb }}', disk_type: '{{ worker_disk_type }}', ign: '{{ worker_ign }}' }
+       - { vmname: '{{ worker_41 }}', cpu_count: '{{ worker_cpu_count }}', cores: '{{ worker_cpu_cores_per_socket }}', memory: '{{ worker_ram_mb }}', disk_size: '{{ worker_disk_size_gb }}', disk_type: '{{ worker_disk_type }}', ign: '{{ worker_ign }}' }
+       - { vmname: '{{ worker_42 }}', cpu_count: '{{ worker_cpu_count }}', cores: '{{ worker_cpu_cores_per_socket }}', memory: '{{ worker_ram_mb }}', disk_size: '{{ worker_disk_size_gb }}', disk_type: '{{ worker_disk_type }}', ign: '{{ worker_ign }}' }
+#       - { vmname: '{{ worker_43 }}', cpu_count: '{{ worker_cpu_count }}', cores: '{{ worker_cpu_cores_per_socket }}', memory: '{{ worker_ram_mb }}', disk_size: '{{ worker_disk_size_gb }}', disk_type: '{{ worker_disk_type }}', ign: '{{ worker_ign }}' }
+#       - { vmname: '{{ worker_44 }}', cpu_count: '{{ worker_cpu_count }}', cores: '{{ worker_cpu_cores_per_socket }}', memory: '{{ worker_ram_mb }}', disk_size: '{{ worker_disk_size_gb }}', disk_type: '{{ worker_disk_type }}', ign: '{{ worker_ign }}' }
+#       - { vmname: '{{ worker_45 }}', cpu_count: '{{ worker_cpu_count }}', cores: '{{ worker_cpu_cores_per_socket }}', memory: '{{ worker_ram_mb }}', disk_size: '{{ worker_disk_size_gb }}', disk_type: '{{ worker_disk_type }}', ign: '{{ worker_ign }}' }
+#       - { vmname: '{{ worker_46 }}', cpu_count: '{{ worker_cpu_count }}', cores: '{{ worker_cpu_cores_per_socket }}', memory: '{{ worker_ram_mb }}', disk_size: '{{ worker_disk_size_gb }}', disk_type: '{{ worker_disk_type }}', ign: '{{ worker_ign }}' }
+
+  
+  
+  
+   - name: Gather MAC-addresses
+     community.vmware.vmware_guest_info:
+       hostname: "{{ vcenter_server }}"
+       username: "{{ vcenter_user }}"
+       password: "{{ vcenter_pass }}"
+       name: "{{ item.vmname }}"
+       datacenter: "{{ datacenter_name }}"
+       folder: "/{{ datacenter_name }}/{{ cluster4_folder }}"
+     delegate_to: localhost
+     register: info
+     loop:
+       - { vmname: "{{ bootstrap_40 }}" }
+       - { vmname: "{{ master_40 }}" }
+       - { vmname: "{{ master_41 }}" }
+       - { vmname: "{{ master_42 }}" }
+       - { vmname: "{{ worker_40 }}" }
+       - { vmname: "{{ worker_41 }}" }
+       - { vmname: "{{ worker_42 }}" }
+#       - { vmname: "{{ worker_43 }}" }
+#       - { vmname: "{{ worker_44 }}" }
+#       - { vmname: "{{ worker_45 }}" }
+#       - { vmname: "{{ worker_46 }}" }
+   
+   
+   - set_fact:
+       "{{ item.var }}": "{{ info | json_query(query) }}"
+     vars:
+       query: "results[?item.vmname=='{{ item.vmname }}'].instance.hw_eth0.macaddress"  
+     with_items:
+      - { var: "bootstrap0_mac", vmname: "{{ bootstrap_40 }}" }
+      - { var: "master0_mac", vmname: "{{ master_40 }}" }
+      - { var: "master1_mac", vmname: "{{ master_41 }}" }
+      - { var: "master2_mac", vmname: "{{ master_42 }}" }
+      - { var: "worker0_mac", vmname: "{{ worker_40 }}" }
+      - { var: "worker1_mac", vmname: "{{ worker_41 }}" }
+      - { var: "worker2_mac", vmname: "{{ worker_42 }}" }
+#      - { var: "worker3_mac", vmname: "{{ worker_43 }}" }
+#      - { var: "worker4_mac", vmname: "{{ worker_44 }}" }
+#      - { var: "worker5_mac", vmname: "{{ worker_45 }}" }
+#      - { var: "worker6_mac", vmname: "{{ worker_46 }}" }
+     delegate_to: 10.255.200.5
+   
+
+
+   - name: MAC-address replace
+     become: yes
+     replace:
+      path: /etc/dnsmasq.conf
+      regexp: dhcp-host=.*\,192\.168\.255\.{{ item.octet }}
+      replace: 'dhcp-host={{ item.mac | join }},{{ item.ip }}'
+     loop:
+       - { mac: "{{ bootstrap0_mac }}", ip: "{{ bootstrap0_ip }}", octet: 10 }
+       - { mac: "{{ master0_mac }}", ip: "{{ master0_ip }}", octet: 20 }
+       - { mac: "{{ master1_mac }}", ip: "{{ master1_ip }}", octet: 21 }
+       - { mac: "{{ master2_mac }}", ip: "{{ master2_ip }}", octet: 22 }
+       - { mac: "{{ worker0_mac }}", ip: "{{ worker0_ip }}", octet: 30 }
+       - { mac: "{{ worker1_mac }}", ip: "{{ worker1_ip }}", octet: 31 }
+       - { mac: "{{ worker2_mac }}", ip: "{{ worker2_ip }}", octet: 32 }
+#       - { mac: "{{ worker3_mac }}", ip: "{{ worker3_ip }}", octet: 33 }
+#       - { mac: "{{ worker4_mac }}", ip: "{{ worker4_ip }}", octet: 34 }
+#       - { mac: "{{ worker5_mac }}", ip: "{{ worker5_ip }}", octet: 35 }
+#       - { mac: "{{ worker6_mac }}", ip: "{{ worker6_ip }}", octet: 36 }
+     delegate_to: 10.255.200.5
+   
+   
+   
+   - name: dnsmasq restart
+     become: yes
+     systemd:
+      name: dnsmasq
+      state: restarted
+     delegate_to: 10.255.200.5
+
+
+
+#   - name: Set powerstate of a virtual machine to poweron
+#     community.vmware.vmware_guest:
+#      hostname: "{{ vcenter_server }}"
+#      username: "{{ vcenter_user }}"
+#      password: "{{ vcenter_pass }}"
+#      validate_certs: no
+#      name: "{{ item.vmname }}"
+#      state: poweredon
+#     loop:
+#       - { vmname: '{{ worker_27 }}' }

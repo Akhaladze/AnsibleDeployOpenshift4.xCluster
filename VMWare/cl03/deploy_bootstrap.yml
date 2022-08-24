@@ -1,0 +1,120 @@
+---
+- hosts: localhost
+  gather_facts: no
+  vars_prompt:
+    - name: vcenter_pass
+      prompt: "oslynko@vsphere.local's password"
+
+  tasks:
+   
+   - name: Deploying Bootstrap Node
+     community.vmware.vmware_content_deploy_ovf_template:
+       hostname: "{{ vcenter_server }}"
+       username: "{{ vcenter_user }}"
+       password: "{{ vcenter_pass }}"
+       name: "{{ item.vmname }}"
+       ovf_template: "{{ ovf_template }}"
+       datacenter: "{{ datacenter_name }}"
+       folder: "{{ cluster3_ovffolder }}"
+       resource_pool: "{{ item.resource_pool }}"
+       datastore: "{{ item.datastore }}"
+       host: "{{ item.esxi }}"
+       storage_provisioning: "thin"
+     loop:
+      - { vmname: '{{ bootstrap_30 }}', esxi: '{{ esxi_host_34 }}', datastore: '{{ datastore_34 }}', resource_pool: '{{ resource_pool34 }}' }
+   
+   - name: Encoding bootstrap node ignition to base64
+     shell: 'curl 10.255.200.4:8080/bootstrap.ign | base64 -w0 -'
+     delegate_to: localhost
+     register: bootstrap_var
+
+   - set_fact:
+       "bootstrap_ign": "{{ bootstrap_var | json_query(query) }}"
+     vars:
+       query: "stdout"
+     delegate_to: localhost
+
+   
+   - name: Modifying Bootstrap Node
+     community.vmware.vmware_guest:
+       hostname: "{{ vcenter_server }}"
+       username: "{{ vcenter_user }}"
+       password: "{{ vcenter_pass }}"
+       datacenter: "{{ datacenter_name }}"
+       #esxi_hostname: "{{ item.esxi }}"
+       #resource_pool: "{{ resource_pool }}"
+       #datastore: "{{ item.datastore }}"
+       name: "{{ item.vmname }}"
+       folder: /{{ datacenter_name }}/{{ cluster3_folder }}
+       disk:
+       - size_gb: "{{ item.disk_size }}"
+         type: "{{ item.disk_type }}"
+       hardware:
+         num_cpus: "{{ item.cpu_count }}"
+         num_cpu_cores_per_socket: "{{ item.cores }}"
+         memory_mb: "{{ item.memory }}"
+       networks:
+       - name: VM Network
+         vlan: "{{ isolated03 }}"
+       customvalues:
+         - key: guestinfo.ignition.config.data.encoding
+           value: base64
+         - key: guestinfo.ignition.config.data
+           value: "{{ item.ign }}"
+     delegate_to: localhost
+     loop:
+       - { vmname: '{{ bootstrap_30 }}', cpu_count: '{{ bootstrap_cpu_count }}', cores: '{{ bootstrap_cpu_cores_per_socket }}', memory: '{{ bootstrap_ram_mb }}', disk_size: '{{ bootstrap_disk_size_gb }}', disk_type: '{{ bootstrap_disk_type }}', ign: '{{ bootstrap_ign }}' } 
+
+   
+   - name: Gather Bootstrap Node MAC-addresses
+     community.vmware.vmware_guest_info:
+       hostname: "{{ vcenter_server }}"
+       username: "{{ vcenter_user }}"
+       password: "{{ vcenter_pass }}"
+       name: "{{ item.vmname }}"
+       datacenter: "{{ datacenter_name }}"
+       folder: "/{{ datacenter_name }}/{{ cluster3_folder }}"
+     delegate_to: localhost
+     register: info
+     loop:
+       - { vmname: "{{ bootstrap_30 }}" }
+
+
+   - set_fact:
+       "{{ item.var }}": "{{ info | json_query(query) }}"
+     vars:
+       query: "results[?item.vmname=='{{ item.vmname }}'].instance.hw_eth0.macaddress"  
+     with_items:
+      - { var: "bootstrap0_mac", vmname: "{{ bootstrap_30 }}" }
+
+   
+   - name: MAC-address replace
+     become: yes
+     replace:
+      path: /etc/dnsmasq.conf
+      regexp: dhcp-host=.*\,192\.168\.255\.{{ item.octet }}
+      replace: 'dhcp-host={{ item.mac | join }},{{ item.ip }}'
+     loop:
+       - { mac: "{{ bootstrap0_mac }}", ip: "{{ bootstrap0_ip }}", octet: 10 }
+     delegate_to: 10.255.200.4
+   
+   
+   
+   - name: dnsmasq restart
+     become: yes
+     systemd:
+      name: dnsmasq
+      state: restarted
+     delegate_to: 10.255.200.4
+   
+
+   - name: Set powerstate of a virtual machine to poweron
+     community.vmware.vmware_guest:
+      hostname: "{{ vcenter_server }}"
+      username: "{{ vcenter_user }}"
+      password: "{{ vcenter_pass }}"
+      validate_certs: no
+      name: "{{ item.vmname }}"
+      state: poweredon
+     loop:
+       - { vmname: '{{ bootstrap_30 }}' }

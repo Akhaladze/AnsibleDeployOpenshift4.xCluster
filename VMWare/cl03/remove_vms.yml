@@ -1,0 +1,50 @@
+---
+- hosts: localhost
+  gather_facts: no
+  vars_prompt:
+    - name: vcenter_pass
+      prompt: "oslynko@vsphere.local's password"
+
+  tasks:
+
+    - name: Setting powerstate of a virtual machines to off
+      community.vmware.vmware_guest:
+       hostname: "{{ vcenter_server }}"
+       username: "{{ vcenter_user }}"
+       password: "{{ vcenter_pass }}"
+       validate_certs: no
+       name: "{{ item.vmname }}"
+       state: poweredoff
+      with_items:
+        - { vmname: '{{ bootstrap_30 }}' }
+        - { vmname: '{{ master_30 }}' }
+        - { vmname: '{{ master_31 }}' }
+        - { vmname: '{{ master_32 }}' }        
+        - { vmname: '{{ worker_30 }}' }
+        - { vmname: '{{ worker_31 }}' }
+        - { vmname: '{{ worker_32 }}' }
+        - { vmname: '{{ worker_33 }}' }
+        - { vmname: '{{ worker_34 }}' }
+        - { vmname: '{{ worker_35 }}' }
+        - { vmname: '{{ worker_36 }}' }
+    
+    - name: Removing virtual machines
+      community.vmware.vmware_guest:
+       hostname: "{{ vcenter_server }}"
+       username: "{{ vcenter_user }}"
+       password: "{{ vcenter_pass }}"
+       validate_certs: no
+       name: "{{ item.vmname }}"
+       state: absent
+      with_items:
+        - { vmname: '{{ bootstrap_30 }}' }
+        - { vmname: '{{ master_30 }}' }
+        - { vmname: '{{ master_31 }}' }
+        - { vmname: '{{ master_32 }}' }        
+        - { vmname: '{{ worker_30 }}' }
+        - { vmname: '{{ worker_31 }}' }
+        - { vmname: '{{ worker_32 }}' }
+        - { vmname: '{{ worker_33 }}' }
+        - { vmname: '{{ worker_34 }}' }
+        - { vmname: '{{ worker_35 }}' }
+        - { vmname: '{{ worker_36 }}' }

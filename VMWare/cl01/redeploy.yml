@@ -1,0 +1,722 @@
+---
+- hosts: localhost
+  gather_facts: no
+  # vars_prompt:
+  #   - name: vcenter_pass
+  #     prompt: "oslynko@vsphere.local's password"
+
+
+  tasks:
+
+    # - name: Setting powerstate of a virtual machines to off
+    #   community.vmware.vmware_guest:
+    #    hostname: "{{ vcenter_server }}"
+    #    username: "{{ vcenter_user }}"
+    #    password: "{{ vcenter_pass }}"
+    #    validate_certs: no
+    #    name: "{{ item.vmname }}"
+    #    state: poweredoff
+    #   with_items:
+    #     - { vmname: '{{ bootstrap_10 }}' }
+    #     - { vmname: '{{ master_10 }}' }
+    #     - { vmname: '{{ master_11 }}' }
+    #     - { vmname: '{{ master_12 }}' }        
+    #     - { vmname: '{{ worker_10 }}' }
+    #     - { vmname: '{{ worker_11 }}' }
+    #     - { vmname: '{{ worker_12 }}' }
+    #     - { vmname: '{{ worker_13 }}' }
+    #     - { vmname: '{{ worker_14 }}' }
+    #     - { vmname: '{{ worker_15 }}' }
+    #     - { vmname: '{{ worker_16 }}' }
+    
+    
+    # - name: Removing virtual machines
+    #   community.vmware.vmware_guest:
+    #    hostname: "{{ vcenter_server }}"
+    #    username: "{{ vcenter_user }}"
+    #    password: "{{ vcenter_pass }}"
+    #    validate_certs: no
+    #    name: "{{ item.vmname }}"
+    #    state: absent
+    #   with_items:
+    #     - { vmname: '{{ bootstrap_10 }}' }
+    #     - { vmname: '{{ master_10 }}' }
+    #     - { vmname: '{{ master_11 }}' }
+    #     - { vmname: '{{ master_12 }}' }        
+    #     - { vmname: '{{ worker_10 }}' }
+    #     - { vmname: '{{ worker_11 }}' }
+    #     - { vmname: '{{ worker_12 }}' }
+    #     - { vmname: '{{ worker_13 }}' }
+    #     - { vmname: '{{ worker_14 }}' }
+    #     - { vmname: '{{ worker_15 }}' }
+    #     - { vmname: '{{ worker_16 }}' }
+
+  
+    - name: Reconfiguring haproxy
+      become: yes
+      replace:
+       path: /etc/haproxy/haproxy.cfg
+       regexp: '#    server      bootstrap0 192.168.255.10:{{ item.port }} check'
+       replace: '    server      bootstrap0 192.168.255.10:{{ item.port }} check'
+      delegate_to: 10.255.200.2
+      with_items:
+      - { port: 6443 }
+      - { port: 22623 }
+
+
+    - name: Restarting haproxy
+      become: yes
+      systemd:
+        name: haproxy
+        state: restarted
+      delegate_to: 10.255.200.2
+
+
+    - name: Removing logs from previous installation
+      become: yes
+      file:
+        path: "{{ item.file }}"
+        state: absent
+      loop:
+      - { file: /tmp/bootstrap.log }
+      - { file: /tmp/install.log }
+      - { file: /tmp/csr.log }
+      delegate_to: 10.255.200.2
+
+
+    - name: Removing files in /opt/install and /var/www/html
+      become: yes
+      file:
+        path: "{{ item.directory }}"
+        state: "{{ item.state }}"
+        owner: "{{ item.owner }}"
+        group: "{{ item.group }}"
+        mode: 0755
+      loop:
+      - { directory: "/opt/install/", state: absent, owner: root, group: root }
+      - { directory: "/opt/install/", state: directory, owner: root, group: root }
+      - { directory: "/var/www/html/", state: absent, owner: apache, group: apache }
+      - { directory: "/var/www/html/", state: directory, owner: apache, group: apache }
+      delegate_to: 10.255.200.2
+
+
+    - name: Copying installation config
+      become: yes
+      copy:
+        src: /opt/source/install_dir/install-config.yaml
+        dest: /opt/install
+        remote_src: yes
+      delegate_to: 10.255.200.2
+
+
+    - name: Unarchiving openshift-client-linux.tar.gz to /opt/install
+      become: yes
+      unarchive:
+        src: /opt/source/4-5-13/openshift-client-linux.tar.gz
+        dest: /opt/install
+        remote_src: yes
+      delegate_to: 10.255.200.2
+
+
+    - name: Unarchiving openshift-install-linux.tar.gz to /opt/install
+      become: yes
+      unarchive:
+        src: /opt/source/4-5-13/openshift-install-linux.tar.gz
+        dest: /opt/install
+        remote_src: yes
+      delegate_to: 10.255.200.2
+
+
+    - name: Copying binary files to /usr/local/bin
+      become: yes
+      copy:
+        src: /opt/install/{{ item.binary }}
+        dest: /usr/local/bin
+        remote_src: yes
+      loop:
+      - { binary: kubectl }
+      - { binary: oc }
+      - { binary: openshift-install }
+      delegate_to: 10.255.200.2
+
+
+    - name: Removing files in /opt/install/
+      become: yes
+      file:
+        path: /opt/install/{{ item.binary }}
+        state: absent
+      loop:
+      - { binary: kubectl }
+      - { binary: oc }
+      - { binary: openshift-install }
+      delegate_to: 10.255.200.2
+
+
+    - name: Creating manifests
+      become: yes
+      shell: 'openshift-install create manifests --dir=/opt/install'
+      delegate_to: 10.255.200.2
+
+
+    - name: Modifying config file
+      become: yes
+      replace:
+        path: /opt/install/manifests/cluster-scheduler-02-config.yml
+        regexp: '  mastersSchedulable: true'
+        replace: '  mastersSchedulable: false'
+      delegate_to: 10.255.200.2
+
+
+    - name: Creating ignition files
+      become: yes
+      shell: 'openshift-install create ignition-configs --dir=/opt/install'
+      delegate_to: 10.255.200.2
+
+
+    - name: Copying rhcos image to /var/www/html
+      become: yes
+      copy:
+        src: /opt/source/4-5-13/rhcos.raw.xz
+        dest: /var/www/html
+        remote_src: yes
+      delegate_to: 10.255.200.2
+
+
+    - name: Copying other files to /var/www/html
+      become: yes
+      shell: 'cp -R /opt/install/* /var/www/html/'
+      delegate_to: 10.255.200.2
+
+
+    - name: Changing owner at /var/www/html
+      become: yes
+      shell: 'chown -R apache:apache /var/www/html/'
+      delegate_to: 10.255.200.2
+
+
+    - name: Changing permissions at /var/www/html
+      become: yes
+      shell: 'chmod 644 /var/www/html/*'
+      delegate_to: 10.255.200.2
+
+
+    - name: Copying kubeconfig to /root/.kube
+      become: yes
+      copy:
+        src: /opt/install/auth/kubeconfig
+        dest: /root/.kube/config
+        remote_src: yes
+      delegate_to: 10.255.200.2
+
+
+    - name: Deploying Bootstrap Node
+      community.vmware.vmware_content_deploy_ovf_template:
+        validate_certs: no
+        hostname: "{{ vcenter_server }}"
+        username: "{{ vcenter_user }}"
+        password: "{{ vcenter_pass }}"
+        name: "{{ item.vmname }}"
+        ovf_template: "{{ ovf_template }}"
+        datacenter: "{{ datacenter_name }}"
+        folder: "{{ cluster1_ovffolder }}"
+        resource_pool: "{{ item.resource_pool }}"
+        datastore: "{{ item.datastore }}"
+        host: "{{ item.esxi }}"
+        storage_provisioning: "thin"
+      loop:
+        - { vmname: '{{ bootstrap_10 }}', esxi: '{{ esxi_host_34 }}', datastore: '{{ datastore_34 }}', resource_pool: '{{ resource_pool34 }}' }
+
+
+    - name: Encoding bootstrap node ignition to base64
+      shell: 'curl 10.255.200.2:8080/bootstrap.ign | base64 -w0 -'
+      delegate_to: localhost
+      register: bootstrap_var
+
+
+    - set_fact:
+        "bootstrap_ign": "{{ bootstrap_var | json_query(query) }}"
+      vars:
+        query: "stdout"
+      delegate_to: localhost
+
+    
+    - name: Modifying Bootstrap Node
+      community.vmware.vmware_guest:
+        validate_certs: no
+        hostname: "{{ vcenter_server }}"
+        username: "{{ vcenter_user }}"
+        password: "{{ vcenter_pass }}"
+        datacenter: "{{ datacenter_name }}"
+        #esxi_hostname: "{{ item.esxi }}"
+        #resource_pool: "{{ resource_pool }}"
+        #datastore: "{{ item.datastore }}"
+        name: "{{ item.vmname }}"
+        folder: /{{ datacenter_name }}/{{ cluster1_folder }}
+        disk:
+        - size_gb: "{{ item.disk_size }}"
+          type: "{{ item.disk_type }}"
+        hardware:
+          num_cpus: "{{ item.cpu_count }}"
+          num_cpu_cores_per_socket: "{{ item.cores }}"
+          memory_mb: "{{ item.memory }}"
+        networks:
+        - name: VM Network
+          vlan: "{{ isolated01 }}"
+        customvalues:
+          - key: guestinfo.ignition.config.data.encoding
+            value: base64
+          - key: guestinfo.ignition.config.data
+            value: "{{ item.ign }}"
+      delegate_to: localhost
+      loop:
+        - { vmname: '{{ bootstrap_10 }}', cpu_count: '{{ bootstrap_cpu_count }}', cores: '{{ bootstrap_cpu_cores_per_socket }}', memory: '{{ bootstrap_ram_mb }}', disk_size: '{{ bootstrap_disk_size_gb }}', disk_type: '{{ bootstrap_disk_type }}', ign: '{{ bootstrap_ign }}' } 
+
+    
+    - name: Gathering Bootstrap Node MAC-address
+      community.vmware.vmware_guest_info:
+        hostname: "{{ vcenter_server }}"
+        username: "{{ vcenter_user }}"
+        password: "{{ vcenter_pass }}"
+        name: "{{ item.vmname }}"
+        datacenter: "{{ datacenter_name }}"
+        folder: "/{{ datacenter_name }}/{{ cluster1_folder }}"
+      delegate_to: localhost
+      register: info
+      loop:
+        - { vmname: "{{ bootstrap_10 }}" }
+
+
+    - set_fact:
+        "{{ item.var }}": "{{ info | json_query(query) }}"
+      vars:
+        query: "results[?item.vmname=='{{ item.vmname }}'].instance.hw_eth0.macaddress"  
+      with_items:
+        - { var: "bootstrap0_mac", vmname: "{{ bootstrap_10 }}" }
+
+    
+    - name: Replacing Bootstrap MAC-address at dnsmasq.conf
+      become: yes
+      replace:
+        path: /etc/dnsmasq.conf
+        regexp: dhcp-host=.*\,192\.168\.255\.{{ item.octet }}
+        replace: 'dhcp-host={{ item.mac | join }},{{ item.ip }}'
+      loop:
+        - { mac: "{{ bootstrap0_mac }}", ip: "{{ bootstrap0_ip }}", octet: 10 }
+      delegate_to: 10.255.200.2
+        
+    
+    - name: Restarting dnsmasq
+      become: yes
+      systemd:
+        name: dnsmasq
+        state: restarted
+      delegate_to: 10.255.200.2
+    
+
+    - name: Setting powerstate of Bootstrap VM to poweron
+      community.vmware.vmware_guest:
+        hostname: "{{ vcenter_server }}"
+        username: "{{ vcenter_user }}"
+        password: "{{ vcenter_pass }}"
+        validate_certs: no
+        name: "{{ item.vmname }}"
+        state: poweredon
+      loop:
+        - { vmname: '{{ bootstrap_10 }}' }
+
+   
+    - name: Deploying Master nodes VMs
+      community.vmware.vmware_content_deploy_ovf_template:
+        hostname: "{{ vcenter_server }}"
+        username: "{{ vcenter_user }}"
+        password: "{{ vcenter_pass }}"
+        name: "{{ item.vmname }}"
+        ovf_template: "{{ ovf_template }}"
+        datacenter: "{{ datacenter_name }}"
+        folder: "{{ cluster1_ovffolder }}"
+        resource_pool: "{{ item.resource_pool }}"
+        datastore: "{{ item.datastore }}"
+        host: "{{ item.esxi }}"
+        storage_provisioning: "thin"
+      loop:
+        - { vmname: '{{ master_10 }}', esxi: '{{ esxi_host_33 }}', datastore: '{{ datastore_33 }}', resource_pool: '{{ resource_pool33 }}' }
+        - { vmname: '{{ master_11 }}', esxi: '{{ esxi_host_34 }}', datastore: '{{ datastore_34 }}', resource_pool: '{{ resource_pool34 }}' }
+        - { vmname: '{{ master_12 }}', esxi: '{{ esxi_host_35 }}', datastore: '{{ datastore_35 }}', resource_pool: '{{ resource_pool35 }}' }
+        
+
+    - name: Encoding master node ignition to base64
+      shell: 'curl 10.255.200.2:8080/master.ign | base64 -w0 -'
+      delegate_to: localhost
+      register: master_var
+
+
+    - set_fact:
+        "master_ign": "{{ master_var | json_query(query) }}"
+      vars:
+        query: "stdout"
+      delegate_to: localhost
+      
+
+    - name: Starting openshift-install command output to file
+      become: yes
+      shell: 'screen -dm bash -c "openshift-install --dir=/opt/install wait-for bootstrap-complete --log-level debug &> /tmp/bootstrap.log"'
+      delegate_to: 10.255.200.2
+
+
+    - name: Modifying Master VMs
+      community.vmware.vmware_guest:
+        hostname: "{{ vcenter_server }}"
+        username: "{{ vcenter_user }}"
+        password: "{{ vcenter_pass }}"
+        datacenter: "{{ datacenter_name }}"
+        #esxi_hostname: "{{ item.esxi }}"
+        #resource_pool: "{{ resource_pool }}"
+        #datastore: "{{ item.datastore }}"
+        name: "{{ item.vmname }}"
+        folder: /{{ datacenter_name }}/{{ cluster1_folder }}
+        disk:
+        - size_gb: "{{ item.disk_size }}"
+          type: "{{ item.disk_type }}"
+        hardware:
+          num_cpus: "{{ item.cpu_count }}"
+          num_cpu_cores_per_socket: "{{ item.cores }}"
+          memory_mb: "{{ item.memory }}"
+        networks:
+        - name: VM Network
+          vlan: "{{ isolated01 }}"
+        vapp_properties:
+        - id: guestinfo.ignition.config.data.encoding
+          label: Ignition config data encoding
+          value: base64
+        - id: guestinfo.ignition.config.data
+          label: Ignition config data
+          value: "{{ item.ign }}"
+      delegate_to: localhost
+      loop:
+        - { vmname: '{{ master_10 }}', cpu_count: '{{ master_cpu_count }}', cores: '{{ master_cpu_cores_per_socket }}', memory: '{{ master_ram_mb }}', disk_size: '{{ master_disk_size_gb }}', disk_type: '{{ master_disk_type }}', ign: '{{ master_ign }}' } 
+        - { vmname: '{{ master_11 }}', cpu_count: '{{ master_cpu_count }}', cores: '{{ master_cpu_cores_per_socket }}', memory: '{{ master_ram_mb }}', disk_size: '{{ master_disk_size_gb }}', disk_type: '{{ master_disk_type }}', ign: '{{ master_ign }}' } 
+        - { vmname: '{{ master_12 }}', cpu_count: '{{ master_cpu_count }}', cores: '{{ master_cpu_cores_per_socket }}', memory: '{{ master_ram_mb }}', disk_size: '{{ master_disk_size_gb }}', disk_type: '{{ master_disk_type }}', ign: '{{ master_ign }}' } 
+
+    
+    - name: Gathering Master Nodes MAC-addresses
+      community.vmware.vmware_guest_info:
+        hostname: "{{ vcenter_server }}"
+        username: "{{ vcenter_user }}"
+        password: "{{ vcenter_pass }}"
+        name: "{{ item.vmname }}"
+        datacenter: "{{ datacenter_name }}"
+        folder: "/{{ datacenter_name }}/{{ cluster1_folder }}"
+      delegate_to: localhost
+      register: info
+      loop:
+  #       - { vmname: "{{ bootstrap_10 }}" }
+        - { vmname: "{{ master_10 }}" }
+        - { vmname: "{{ master_11 }}" }
+        - { vmname: "{{ master_12 }}" }
+   
+    
+    - set_fact:
+        "{{ item.var }}": "{{ info | json_query(query) }}"
+      vars:
+        query: "results[?item.vmname=='{{ item.vmname }}'].instance.hw_eth0.macaddress"  
+      with_items:
+  #      - { var: "bootstrap0_mac", vmname: "{{ bootstrap_40 }}" }
+        - { var: "master0_mac", vmname: "{{ master_10 }}" }
+        - { var: "master1_mac", vmname: "{{ master_11 }}" }
+        - { var: "master2_mac", vmname: "{{ master_12 }}" }
+      delegate_to: 10.255.200.2
+    
+
+    - name: Replacing Master Node MAC-address
+      become: yes
+      replace:
+        path: /etc/dnsmasq.conf
+        regexp: dhcp-host=.*\,192\.168\.255\.{{ item.octet }}
+        replace: 'dhcp-host={{ item.mac | join }},{{ item.ip }}'
+      loop:
+        - { mac: "{{ master0_mac }}", ip: "{{ master0_ip }}", octet: 20 }
+        - { mac: "{{ master1_mac }}", ip: "{{ master1_ip }}", octet: 21 }
+        - { mac: "{{ master2_mac }}", ip: "{{ master2_ip }}", octet: 22 }
+      delegate_to: 10.255.200.2
+     
+    
+    - name: Restarting dnsmasq
+      become: yes
+      systemd:
+        name: dnsmasq
+        state: restarted
+      delegate_to: 10.255.200.2
+
+
+    - name: Waiting for bootstrap node
+      wait_for:
+        path: /tmp/bootstrap.log
+        search_regex: "Waiting up to 40m0s for bootstrapping to complete..."
+        timeout: 2400
+      delegate_to: 10.255.200.2
+
+
+    - name: Setting powerstate of Master VM to poweron
+      community.vmware.vmware_guest:
+        hostname: "{{ vcenter_server }}"
+        username: "{{ vcenter_user }}"
+        password: "{{ vcenter_pass }}"
+        validate_certs: no
+        name: "{{ item.vmname }}"
+        state: poweredon
+      loop:
+      - { vmname: '{{ master_10 }}' }
+      - { vmname: '{{ master_11 }}' }
+      - { vmname: '{{ master_12 }}' }
+
+
+    - name: Deploying Worker nodes VMs
+      community.vmware.vmware_content_deploy_ovf_template:
+        hostname: "{{ vcenter_server }}"
+        username: "{{ vcenter_user }}"
+        password: "{{ vcenter_pass }}"
+        name: "{{ item.vmname }}"
+        ovf_template: "{{ ovf_template }}"
+        datacenter: "{{ datacenter_name }}"
+        folder: "{{ cluster1_ovffolder }}"
+        resource_pool: "{{ item.resource_pool }}"
+        datastore: "{{ item.datastore }}"
+        host: "{{ item.esxi }}"
+        storage_provisioning: "thin"
+      loop:
+        - { vmname: '{{ worker_10 }}', esxi: '{{ esxi_host_33 }}', datastore: '{{ datastore_33 }}', resource_pool: '{{ resource_pool33 }}' }
+        - { vmname: '{{ worker_11 }}', esxi: '{{ esxi_host_34 }}', datastore: '{{ datastore_34 }}', resource_pool: '{{ resource_pool34 }}' }
+        - { vmname: '{{ worker_12 }}', esxi: '{{ esxi_host_33 }}', datastore: '{{ datastore_33 }}', resource_pool: '{{ resource_pool33 }}' }
+        - { vmname: '{{ worker_13 }}', esxi: '{{ esxi_host_34 }}', datastore: '{{ datastore_34 }}', resource_pool: '{{ resource_pool34 }}' }
+        - { vmname: '{{ worker_14 }}', esxi: '{{ esxi_host_33 }}', datastore: '{{ datastore_33 }}', resource_pool: '{{ resource_pool33 }}' }
+        - { vmname: '{{ worker_15 }}', esxi: '{{ esxi_host_34 }}', datastore: '{{ datastore_34 }}', resource_pool: '{{ resource_pool34 }}' }
+        - { vmname: '{{ worker_16 }}', esxi: '{{ esxi_host_35 }}', datastore: '{{ datastore_35 }}', resource_pool: '{{ resource_pool35 }}' }
+
+
+    - name: Encoding worker node ignition to base64
+      shell: 'curl 10.255.200.2:8080/worker.ign | base64 -w0 -'
+      delegate_to: localhost
+      register: worker_var
+
+
+    - set_fact:
+        "worker_ign": "{{ worker_var | json_query(query) }}"
+      vars:
+        query: "stdout"
+      delegate_to: localhost
+
+    
+    - name: Modifying Worker VMs
+      community.vmware.vmware_guest:
+        hostname: "{{ vcenter_server }}"
+        username: "{{ vcenter_user }}"
+        password: "{{ vcenter_pass }}"
+        datacenter: "{{ datacenter_name }}"
+        #esxi_hostname: "{{ item.esxi }}"
+        #resource_pool: "{{ resource_pool }}"
+        #datastore: "{{ item.datastore }}"
+        name: "{{ item.vmname }}"
+        folder: /{{ datacenter_name }}/{{ cluster1_folder }}
+        disk:
+        - size_gb: "{{ item.disk_size }}"
+          type: "{{ item.disk_type }}"
+        hardware:
+          num_cpus: "{{ item.cpu_count }}"
+          num_cpu_cores_per_socket: "{{ item.cores }}"
+          memory_mb: "{{ item.memory }}"
+        networks:
+        - name: VM Network
+          vlan: "{{ isolated01 }}"
+        vapp_properties:
+        - id: guestinfo.ignition.config.data.encoding
+          label: Ignition config data encoding
+          value: base64
+        - id: guestinfo.ignition.config.data
+          label: Ignition config data
+          value: "{{ item.ign }}"
+      delegate_to: localhost
+      loop:
+        - { vmname: '{{ worker_10 }}', cpu_count: '{{ worker_cpu_count }}', cores: '{{ worker_cpu_cores_per_socket }}', memory: '{{ worker_ram_mb }}', disk_size: '{{ worker_disk_size_gb }}', disk_type: '{{ worker_disk_type }}', ign: '{{ worker_ign }}' }
+        - { vmname: '{{ worker_11 }}', cpu_count: '{{ worker_cpu_count }}', cores: '{{ worker_cpu_cores_per_socket }}', memory: '{{ worker_ram_mb }}', disk_size: '{{ worker_disk_size_gb }}', disk_type: '{{ worker_disk_type }}', ign: '{{ worker_ign }}' }
+        - { vmname: '{{ worker_12 }}', cpu_count: '{{ worker_cpu_count }}', cores: '{{ worker_cpu_cores_per_socket }}', memory: '{{ worker_ram_mb }}', disk_size: '{{ worker_disk_size_gb }}', disk_type: '{{ worker_disk_type }}', ign: '{{ worker_ign }}' }
+        - { vmname: '{{ worker_13 }}', cpu_count: '{{ worker_cpu_count }}', cores: '{{ worker_cpu_cores_per_socket }}', memory: '{{ worker_ram_mb }}', disk_size: '{{ worker_disk_size_gb }}', disk_type: '{{ worker_disk_type }}', ign: '{{ worker_ign }}' }
+        - { vmname: '{{ worker_14 }}', cpu_count: '{{ worker_cpu_count }}', cores: '{{ worker_cpu_cores_per_socket }}', memory: '{{ worker_ram_mb }}', disk_size: '{{ worker_disk_size_gb }}', disk_type: '{{ worker_disk_type }}', ign: '{{ worker_ign }}' }
+        - { vmname: '{{ worker_15 }}', cpu_count: '{{ worker_cpu_count }}', cores: '{{ worker_cpu_cores_per_socket }}', memory: '{{ worker_ram_mb }}', disk_size: '{{ worker_disk_size_gb }}', disk_type: '{{ worker_disk_type }}', ign: '{{ worker_ign }}' }
+        - { vmname: '{{ worker_16 }}', cpu_count: '{{ worker_cpu_count }}', cores: '{{ worker_cpu_cores_per_socket }}', memory: '{{ worker_ram_mb }}', disk_size: '{{ worker_disk_size_gb }}', disk_type: '{{ worker_disk_type }}', ign: '{{ worker_ign }}' }
+    
+    
+    - name: Gathering Worker MAC-addresses
+      community.vmware.vmware_guest_info:
+        hostname: "{{ vcenter_server }}"
+        username: "{{ vcenter_user }}"
+        password: "{{ vcenter_pass }}"
+        name: "{{ item.vmname }}"
+        datacenter: "{{ datacenter_name }}"
+        folder: "/{{ datacenter_name }}/{{ cluster1_folder }}"
+      delegate_to: localhost
+      register: info
+      loop:
+        - { vmname: "{{ worker_10 }}" }
+        - { vmname: "{{ worker_11 }}" }
+        - { vmname: "{{ worker_12 }}" }
+        - { vmname: "{{ worker_13 }}" }
+        - { vmname: "{{ worker_14 }}" }
+        - { vmname: "{{ worker_15 }}" }
+        - { vmname: "{{ worker_16 }}" }
+    
+    
+    - set_fact:
+        "{{ item.var }}": "{{ info | json_query(query) }}"
+      vars:
+        query: "results[?item.vmname=='{{ item.vmname }}'].instance.hw_eth0.macaddress"  
+      with_items:
+        - { var: "worker0_mac", vmname: "{{ worker_10 }}" }
+        - { var: "worker1_mac", vmname: "{{ worker_11 }}" }
+        - { var: "worker2_mac", vmname: "{{ worker_12 }}" }
+        - { var: "worker3_mac", vmname: "{{ worker_13 }}" }
+        - { var: "worker4_mac", vmname: "{{ worker_14 }}" }
+        - { var: "worker5_mac", vmname: "{{ worker_15 }}" }
+        - { var: "worker6_mac", vmname: "{{ worker_16 }}" }
+      delegate_to: 10.255.200.2
+
+
+    - name: Replacing Workers MAC-address
+      become: yes
+      replace:
+        path: /etc/dnsmasq.conf
+        regexp: dhcp-host=.*\,192\.168\.255\.{{ item.octet }}
+        replace: 'dhcp-host={{ item.mac | join }},{{ item.ip }}'
+      loop:
+        - { mac: "{{ worker0_mac }}", ip: "{{ worker0_ip }}", octet: 30 }
+        - { mac: "{{ worker1_mac }}", ip: "{{ worker1_ip }}", octet: 31 }
+        - { mac: "{{ worker2_mac }}", ip: "{{ worker2_ip }}", octet: 32 }
+        - { mac: "{{ worker3_mac }}", ip: "{{ worker3_ip }}", octet: 33 }
+        - { mac: "{{ worker4_mac }}", ip: "{{ worker4_ip }}", octet: 34 }
+        - { mac: "{{ worker5_mac }}", ip: "{{ worker5_ip }}", octet: 35 }
+        - { mac: "{{ worker6_mac }}", ip: "{{ worker6_ip }}", octet: 36 }
+      delegate_to: 10.255.200.2
+      
+    
+    - name: Restarting dnsmasq
+      become: yes
+      systemd:
+        name: dnsmasq
+        state: restarted
+      delegate_to: 10.255.200.2
+
+
+    - name: Waiting for master nodes installation finish
+      wait_for:
+        path: /tmp/bootstrap.log
+        search_regex: "It is now safe to remove the bootstrap resources"
+        timeout: 2400
+      delegate_to: 10.255.200.2
+
+
+    - name: Shutting down bootstrap VM
+      community.vmware.vmware_guest:
+       hostname: "{{ vcenter_server }}"
+       username: "{{ vcenter_user }}"
+       password: "{{ vcenter_pass }}"
+       validate_certs: no
+       name: "{{ item.vmname }}"
+       state: shutdownguest
+      with_items:
+        - { vmname: '{{ bootstrap_10 }}' }
+    
+
+    - name: Reconfiguring haproxy
+      become: yes
+      replace:
+       path: /etc/haproxy/haproxy.cfg
+       regexp: '    server      bootstrap0 192.168.255.10:{{ item.port }} check'
+       replace: '#    server      bootstrap0 192.168.255.10:{{ item.port }} check'
+      delegate_to: 10.255.200.2
+      with_items:
+      - { port: 6443 }
+      - { port: 22623 }
+
+
+    - name: Restarting haproxy
+      become: yes
+      systemd:
+        name: haproxy
+        state: restarted
+      delegate_to: 10.255.200.2
+   
+    
+    - name: Setting powerstate of Worker VM to ON
+      community.vmware.vmware_guest:
+        hostname: "{{ vcenter_server }}"
+        username: "{{ vcenter_user }}"
+        password: "{{ vcenter_pass }}"
+        validate_certs: no
+        name: "{{ item.vmname }}"
+        state: poweredon
+      loop:
+      - { vmname: "{{ worker_10 }}" }
+      - { vmname: "{{ worker_11 }}" }
+      - { vmname: "{{ worker_12 }}" }
+      - { vmname: "{{ worker_13 }}" }
+      - { vmname: "{{ worker_14 }}" }
+      - { vmname: "{{ worker_15 }}" }
+      - { vmname: "{{ worker_16 }}" }
+
+
+    - name: Starting oc get csr command output to file
+      become: yes
+      shell: screen -dm bash -c "watch -n 1 'oc get csr | wc -l > /tmp/csr.log'"
+      delegate_to: 10.255.200.2
+
+
+    - name: Waiting for Bootstrap CSRs pending status
+      wait_for:
+        path: /tmp/csr.log
+        search_regex: "14"
+        timeout: 2400
+      delegate_to: 10.255.200.2
+
+
+    - name: Approving Bootstrap CSRs
+      become: yes
+      shell: oc get csr -ojson | jq -r '.items[] | select(.status == {} ) | .metadata.name' | xargs oc adm certificate approve
+      delegate_to: 10.255.200.2
+
+
+    - name: Waiting for Worker CSRs pending status
+      wait_for:
+        path: /tmp/csr.log
+        search_regex: "21"
+        timeout: 2400
+      delegate_to: 10.255.200.2
+
+
+    - name: Approving Worker CSRs
+      become: yes
+      shell: oc get csr -ojson | jq -r '.items[] | select(.status == {} ) | .metadata.name' | xargs oc adm certificate approve
+      delegate_to: 10.255.200.2      
+
+
+    - name: Starting openshift-install command output to file
+      become: yes
+      shell: 'screen -dm bash -c "openshift-install --dir=/opt/install wait-for install-complete --log-level debug &> /tmp/install.log"'
+      delegate_to: 10.255.200.2
+      
+
+    - name: Waiting for cluster installation finish
+      wait_for:
+        path: /tmp/install.log
+        search_regex: "Install complete!"
+        timeout: 2400
+      delegate_to: 10.255.200.2
+    
+
+    - name: Stopping oc get csr command
+      become: yes
+      shell: kill `ps ax | grep /tmp/csr.log | awk '{print $1}' | head -n 1`
+      delegate_to: 10.255.200.2
+   
+
+    - debug:
+        msg: 
+          - "Cluster was deployed successfuly"

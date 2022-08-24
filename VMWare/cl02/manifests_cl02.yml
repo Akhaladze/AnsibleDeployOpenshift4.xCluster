@@ -1,0 +1,90 @@
+---
+- hosts: 10.255.200.3
+  gather_facts: no
+  become: yes
+  become_method: sudo
+
+  tasks:
+   
+   - name: Removing files in /opt/install and /var/www/html
+     file:
+       path: "{{ item.directory }}"
+       state: "{{ item.state }}"
+       owner: "{{ item.owner }}"
+       group: "{{ item.group }}"
+       mode: 0755
+     loop:
+     - { directory: "/opt/install/", state: absent, owner: root, group: root }
+     - { directory: "/opt/install/", state: directory, owner: root, group: root }
+     - { directory: "/var/www/html/", state: absent, owner: apache, group: apache }
+     - { directory: "/var/www/html/", state: directory, owner: apache, group: apache }
+
+   - name: Copying installation config
+     copy:
+       src: /opt/source/install_dir/install-config.yaml
+       dest: /opt/install
+       remote_src: yes
+
+   - name: Unarchiving openshift-client-linux.tar.gz to /opt/install
+     unarchive:
+      src: /opt/source/4-5-13/openshift-client-linux.tar.gz
+      dest: /opt/install
+      remote_src: yes
+
+   - name: Unarchiving openshift-install-linux.tar.gz to /opt/install
+     unarchive:
+      src: /opt/source/4-5-13/openshift-install-linux.tar.gz
+      dest: /opt/install
+      remote_src: yes
+   
+   - name: Copying binary files to /usr/local/bin
+     copy:
+       src: /opt/install/{{ item.binary }}
+       dest: /usr/local/bin
+       remote_src: yes
+     loop:
+     - { binary: kubectl }
+     - { binary: oc }
+     - { binary: openshift-install }
+   
+   - name: Removing files in /opt/install/
+     file:
+       path: /opt/install/{{ item.binary }}
+       state: absent
+     loop:
+     - { binary: kubectl }
+     - { binary: oc }
+     - { binary: openshift-install }
+   
+   - name: Creating manifests
+     shell: 'openshift-install create manifests --dir=/opt/install'
+
+   - name: Modifying config file
+     replace:
+       path: /opt/install/manifests/cluster-scheduler-02-config.yml
+       regexp: '  mastersSchedulable: true'
+       replace: '  mastersSchedulable: false'
+
+   - name: Creating ignition files
+     shell: 'openshift-install create ignition-configs --dir=/opt/install'
+
+   - name: Copying rhcos image to /var/www/html
+     copy:
+       src: /opt/source/4-5-13/rhcos.raw.xz
+       dest: /var/www/html
+       remote_src: yes
+   
+   - name: Copying other files to /var/www/html
+     shell: 'cp -R /opt/install/* /var/www/html/'
+   
+   - name: Changing owner at /var/www/html
+     shell: 'chown -R apache:apache /var/www/html/'
+
+   - name: Changing permissions at /var/www/html
+     shell: 'chmod 644 /var/www/html/*'
+
+   - name: Copying kubeconfig to /root/.kube
+     copy:
+       src: /opt/install/auth/kubeconfig
+       dest: /root/.kube/config
+       remote_src: yes

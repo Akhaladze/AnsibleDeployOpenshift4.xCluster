@@ -1,0 +1,268 @@
+reloading configuration succeeded
+reloading zones succeeded
+all zones loaded
+running
+managed-keys-zone: Key 20326 for zone . acceptance timer complete: key now trusted
+client @0x7f25280ea320 10.255.200.187#53281: update '200.255.10.in-addr.arpa/IN' denied
+client @0x7f2521740800 10.255.200.198#55670: update '200.255.10.in-addr.arpa/IN' denied
+trust-anchor-telemetry '_ta-4f66/IN' from 10.255.200.254
+trust-anchor-telemetry '_ta-4f66/IN' from 10.255.200.254
+trust-anchor-telemetry '_ta-4f66/IN' from 10.255.200.254
+trust-anchor-telemetry '_ta-4f66/IN' from 10.255.200.254
+trust-anchor-telemetry '_ta-4f66/IN' from 10.255.200.254
+managed-keys-zone: Key 20326 for zone . acceptance timer complete: key now trusted
+client @0x7f2521118000 10.255.200.187#57702: update '200.255.10.in-addr.arpa/IN' denied
+client @0x7f25280567e0 10.255.200.198#59167: update '200.255.10.in-addr.arpa/IN' denied
+resolver priming query complete
+client @0x7f25201fee60 127.0.0.1#51495/key rndc-key: signer "rndc-key" approved
+client @0x7f25201fee60 127.0.0.1#51495/key rndc-key: updating zone 'core.local/IN': deleting an RR at server-rsyslog.core.local A
+zone core.local/IN: sending notifies (serial 2021074081)
+client @0x7f252803c150 127.0.0.1#42239/key rndc-key: signer "rndc-key" approved
+client @0x7f252803c150 127.0.0.1#42239/key rndc-key: updating zone 'core.local/IN': deleting an RR at server-rsyslog.core.local TXT
+client @0x7f252000f840 127.0.0.1#41279/key rndc-key: signer "rndc-key" approved
+client @0x7f252000f840 127.0.0.1#41279/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': deleting rrset at '221.200.255.10.in-addr.arpa' PTR
+zone 200.255.10.in-addr.arpa/IN: sending notifies (serial 2021064544)
+zone core.local/IN: sending notifies (serial 2021074082)
+trust-anchor-telemetry '_ta-4f66/IN' from 10.255.200.254
+managed-keys-zone: Key 20326 for zone . acceptance timer complete: key now trusted
+client @0x7f2528041dd0 127.0.0.1#56693/key rndc-key: signer "rndc-key" approved
+client @0x7f2528041dd0 127.0.0.1#56693/key rndc-key: updating zone 'core.local/IN': adding an RR at 'oslynko-rhel9-01.core.local' A 10.255.200.170
+client @0x7f2528041dd0 127.0.0.1#56693/key rndc-key: updating zone 'core.local/IN': adding an RR at 'oslynko-rhel9-01.core.local' TXT "31bce764be988ca296eee40c2757f62280"
+client @0x7f25201fee60 127.0.0.1#37291/key rndc-key: signer "rndc-key" approved
+client @0x7f25201fee60 127.0.0.1#37291/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': deleting rrset at '170.200.255.10.in-addr.arpa' PTR
+client @0x7f25201fee60 127.0.0.1#37291/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': adding an RR at '170.200.255.10.in-addr.arpa' PTR oslynko-rhel9-01.core.local.
+zone core.local/IN: sending notifies (serial 2021074083)
+zone 200.255.10.in-addr.arpa/IN: sending notifies (serial 2021064545)
+client @0x7f2521740800 10.255.200.187#50314: update '200.255.10.in-addr.arpa/IN' denied
+client @0x7f252803c150 127.0.0.1#32785/key rndc-key: signer "rndc-key" approved
+client @0x7f252803c150 127.0.0.1#32785/key rndc-key: updating zone 'core.local/IN': deleting an RR at oslynko-rhel9-01.core.local A
+zone core.local/IN: sending notifies (serial 2021074084)
+client @0x7f252000f840 127.0.0.1#48119/key rndc-key: signer "rndc-key" approved
+client @0x7f252000f840 127.0.0.1#48119/key rndc-key: updating zone 'core.local/IN': deleting an RR at oslynko-rhel9-01.core.local TXT
+client @0x7f2528041dd0 127.0.0.1#51510/key rndc-key: signer "rndc-key" approved
+client @0x7f2528041dd0 127.0.0.1#51510/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': deleting rrset at '170.200.255.10.in-addr.arpa' PTR
+zone 200.255.10.in-addr.arpa/IN: sending notifies (serial 2021064546)
+zone core.local/IN: sending notifies (serial 2021074085)
+client @0x7f25201fee60 127.0.0.1#58996/key rndc-key: signer "rndc-key" approved
+client @0x7f25201fee60 127.0.0.1#58996/key rndc-key: updating zone 'core.local/IN': adding an RR at 'oslynko-rhel9-01.core.local' A 10.255.200.164
+client @0x7f25201fee60 127.0.0.1#58996/key rndc-key: updating zone 'core.local/IN': adding an RR at 'oslynko-rhel9-01.core.local' TXT "31931842ee76f48d8d173bc60beae6d668"
+zone core.local/IN: sending notifies (serial 2021074086)
+client @0x7f252803c150 127.0.0.1#55944/key rndc-key: signer "rndc-key" approved
+client @0x7f252803c150 127.0.0.1#55944/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': deleting rrset at '164.200.255.10.in-addr.arpa' PTR
+client @0x7f252803c150 127.0.0.1#55944/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': adding an RR at '164.200.255.10.in-addr.arpa' PTR oslynko-rhel9-01.core.local.
+zone 200.255.10.in-addr.arpa/IN: sending notifies (serial 2021064547)
+client @0x7f25297d6de0 10.255.200.198#55670: update '200.255.10.in-addr.arpa/IN' denied
+trust-anchor-telemetry '_ta-4f66/IN' from 10.255.200.254
+managed-keys-zone: Key 20326 for zone . acceptance timer complete: key now trusted
+client @0x7f25297d6de0 10.255.200.187#58982: update '200.255.10.in-addr.arpa/IN' denied
+client @0x7f252029bae0 10.255.200.198#55670: update '200.255.10.in-addr.arpa/IN' denied
+client @0x7f252102cbd0 10.255.200.198#54059: update '200.255.10.in-addr.arpa/IN' denied
+client @0x7f252102cbd0 10.255.200.198#54056: update '200.255.10.in-addr.arpa/IN' denied
+trust-anchor-telemetry '_ta-4f66/IN' from 10.255.200.254
+managed-keys-zone: Key 20326 for zone . acceptance timer complete: key now trusted
+client @0x7f252000f840 127.0.0.1#53538/key rndc-key: signer "rndc-key" approved
+client @0x7f252000f840 127.0.0.1#53538/key rndc-key: updating zone 'core.local/IN': adding an RR at 'WIN-KGFTV1RE3RD.core.local' A 10.255.200.165
+client @0x7f252000f840 127.0.0.1#53538/key rndc-key: updating zone 'core.local/IN': adding an RR at 'WIN-KGFTV1RE3RD.core.local' TXT "3133d948ed05f5bfaf4f165aeb9cadea9f"
+client @0x7f2528041dd0 127.0.0.1#59567/key rndc-key: signer "rndc-key" approved
+client @0x7f2528041dd0 127.0.0.1#59567/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': deleting rrset at '165.200.255.10.in-addr.arpa' PTR
+client @0x7f2528041dd0 127.0.0.1#59567/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': adding an RR at '165.200.255.10.in-addr.arpa' PTR WIN-KGFTV1RE3RD.core.local.
+zone core.local/IN: sending notifies (serial 2021074087)
+zone 200.255.10.in-addr.arpa/IN: sending notifies (serial 2021064548)
+client @0x7f25201fee60 127.0.0.1#39384/key rndc-key: signer "rndc-key" approved
+client @0x7f25201fee60 127.0.0.1#39384/key rndc-key: updating zone 'core.local/IN': deleting an RR at WIN-KGFTV1RE3RD.core.local A
+client @0x7f252803c150 127.0.0.1#55912/key rndc-key: signer "rndc-key" approved
+client @0x7f252803c150 127.0.0.1#55912/key rndc-key: updating zone 'core.local/IN': deleting an RR at WIN-KGFTV1RE3RD.core.local TXT
+zone core.local/IN: sending notifies (serial 2021074089)
+client @0x7f252000f840 127.0.0.1#42761/key rndc-key: signer "rndc-key" approved
+client @0x7f252000f840 127.0.0.1#42761/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': deleting rrset at '165.200.255.10.in-addr.arpa' PTR
+zone 200.255.10.in-addr.arpa/IN: sending notifies (serial 2021064549)
+client @0x7f2528041dd0 127.0.0.1#45998/key rndc-key: signer "rndc-key" approved
+client @0x7f2528041dd0 127.0.0.1#45998/key rndc-key: updating zone 'core.local/IN': adding an RR at 'WinColl.core.local' A 10.255.200.165
+client @0x7f2528041dd0 127.0.0.1#45998/key rndc-key: updating zone 'core.local/IN': adding an RR at 'WinColl.core.local' TXT "3133d948ed05f5bfaf4f165aeb9cadea9f"
+client @0x7f25201fee60 127.0.0.1#36221/key rndc-key: signer "rndc-key" approved
+client @0x7f25201fee60 127.0.0.1#36221/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': deleting rrset at '165.200.255.10.in-addr.arpa' PTR
+client @0x7f25201fee60 127.0.0.1#36221/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': adding an RR at '165.200.255.10.in-addr.arpa' PTR WinColl.core.local.
+zone core.local/IN: sending notifies (serial 2021074090)
+zone 200.255.10.in-addr.arpa/IN: sending notifies (serial 2021064550)
+client @0x7f252803c150 127.0.0.1#57117/key rndc-key: signer "rndc-key" approved
+client @0x7f252803c150 127.0.0.1#57117/key rndc-key: updating zone 'core.local/IN': deleting an RR at WinColl.core.local A
+zone core.local/IN: sending notifies (serial 2021074091)
+client @0x7f252000f840 127.0.0.1#50633/key rndc-key: signer "rndc-key" approved
+client @0x7f252000f840 127.0.0.1#50633/key rndc-key: updating zone 'core.local/IN': deleting an RR at WinColl.core.local TXT
+client @0x7f2528041dd0 127.0.0.1#35901/key rndc-key: signer "rndc-key" approved
+client @0x7f2528041dd0 127.0.0.1#35901/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': deleting rrset at '165.200.255.10.in-addr.arpa' PTR
+zone 200.255.10.in-addr.arpa/IN: sending notifies (serial 2021064551)
+zone core.local/IN: sending notifies (serial 2021074092)
+client @0x7f25210c9850 10.255.200.165#51666: update '200.255.10.in-addr.arpa/IN' denied
+client @0x7f2521740800 10.255.200.187#55687: update '200.255.10.in-addr.arpa/IN' denied
+client @0x7f25201fee60 127.0.0.1#41697/key rndc-key: signer "rndc-key" approved
+client @0x7f25201fee60 127.0.0.1#41697/key rndc-key: updating zone 'core.local/IN': adding an RR at 'WIN-B3AVG312BNA.core.local' A 10.255.200.166
+client @0x7f25201fee60 127.0.0.1#41697/key rndc-key: updating zone 'core.local/IN': adding an RR at 'WIN-B3AVG312BNA.core.local' TXT "31930f0cb062e11b32ac6ad835bb4e70ea"
+zone core.local/IN: sending notifies (serial 2021074093)
+client @0x7f252803c150 127.0.0.1#60510/key rndc-key: signer "rndc-key" approved
+client @0x7f252803c150 127.0.0.1#60510/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': deleting rrset at '166.200.255.10.in-addr.arpa' PTR
+client @0x7f252803c150 127.0.0.1#60510/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': adding an RR at '166.200.255.10.in-addr.arpa' PTR WIN-B3AVG312BNA.core.local.
+zone 200.255.10.in-addr.arpa/IN: sending notifies (serial 2021064552)
+client @0x7f252102cbd0 10.255.200.198#54067: update '200.255.10.in-addr.arpa/IN' denied
+trust-anchor-telemetry '_ta-4f66/IN' from 10.255.200.254
+client @0x7f252000f840 127.0.0.1#35641/key rndc-key: signer "rndc-key" approved
+client @0x7f252000f840 127.0.0.1#35641/key rndc-key: updating zone 'core.local/IN': adding an RR at 'DESKTOP-NF96T28.core.local' A 10.255.200.167
+client @0x7f252000f840 127.0.0.1#35641/key rndc-key: updating zone 'core.local/IN': adding an RR at 'DESKTOP-NF96T28.core.local' TXT "31b60fc5c54e82afe6ef239d94d13efe75"
+zone core.local/IN: sending notifies (serial 2021074094)
+client @0x7f2528041dd0 127.0.0.1#39518/key rndc-key: signer "rndc-key" approved
+client @0x7f2528041dd0 127.0.0.1#39518/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': deleting rrset at '167.200.255.10.in-addr.arpa' PTR
+client @0x7f2528041dd0 127.0.0.1#39518/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': adding an RR at '167.200.255.10.in-addr.arpa' PTR DESKTOP-NF96T28.core.local.
+zone 200.255.10.in-addr.arpa/IN: sending notifies (serial 2021064553)
+client @0x7f25201fee60 127.0.0.1#47859/key rndc-key: signer "rndc-key" approved
+client @0x7f25201fee60 127.0.0.1#47859/key rndc-key: updating zone 'core.local/IN': deleting an RR at DESKTOP-NF96T28.core.local A
+zone core.local/IN: sending notifies (serial 2021074095)
+client @0x7f252803c150 127.0.0.1#37338/key rndc-key: signer "rndc-key" approved
+client @0x7f252803c150 127.0.0.1#37338/key rndc-key: updating zone 'core.local/IN': deleting an RR at DESKTOP-NF96T28.core.local TXT
+client @0x7f252000f840 127.0.0.1#54276/key rndc-key: signer "rndc-key" approved
+client @0x7f252000f840 127.0.0.1#54276/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': deleting rrset at '167.200.255.10.in-addr.arpa' PTR
+zone 200.255.10.in-addr.arpa/IN: sending notifies (serial 2021064554)
+zone core.local/IN: sending notifies (serial 2021074096)
+managed-keys-zone: Key 20326 for zone . acceptance timer complete: key now trusted
+client @0x7f2528217f60 10.255.200.165#58766: update '200.255.10.in-addr.arpa/IN' denied
+client @0x7f2528041dd0 127.0.0.1#38841/key rndc-key: signer "rndc-key" approved
+client @0x7f2528041dd0 127.0.0.1#38841/key rndc-key: updating zone 'core.local/IN': deleting an RR at WIN-B3AVG312BNA.core.local A
+client @0x7f25201fee60 127.0.0.1#56352/key rndc-key: signer "rndc-key" approved
+client @0x7f25201fee60 127.0.0.1#56352/key rndc-key: updating zone 'core.local/IN': deleting an RR at WIN-B3AVG312BNA.core.local TXT
+zone core.local/IN: sending notifies (serial 2021074098)
+client @0x7f252803c150 127.0.0.1#50292/key rndc-key: signer "rndc-key" approved
+client @0x7f252803c150 127.0.0.1#50292/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': deleting rrset at '166.200.255.10.in-addr.arpa' PTR
+zone 200.255.10.in-addr.arpa/IN: sending notifies (serial 2021064555)
+client @0x7f252000f840 127.0.0.1#37515/key rndc-key: signer "rndc-key" approved
+client @0x7f252000f840 127.0.0.1#37515/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': deleting rrset at '166.200.255.10.in-addr.arpa' PTR
+client @0x7f252000f840 127.0.0.1#37515/key rndc-key: updating zone '200.255.10.in-addr.arpa/IN': adding an RR at '166.200.255.10.in-addr.arpa' PTR vsilenko-win2019.Absolute.local.
+zone 200.255.10.in-addr.arpa/IN: sending notifies (serial 2021064556)
+client @0x7f2528f69740 10.255.200.187#57473: update '200.255.10.in-addr.arpa/IN' denied
+client @0x7f2528af9420 10.255.200.198#54054: update '200.255.10.in-addr.arpa/IN' denied
+trust-anchor-telemetry '_ta-4f66/IN' from 10.255.200.254
+managed-keys-zone: Key 20326 for zone . acceptance timer complete: key now trusted
+client @0x7f25280b7690 10.255.200.165#63170: update '200.255.10.in-addr.arpa/IN' denied
+client @0x7f25297d6de0 10.255.200.187#55655: update '200.255.10.in-addr.arpa/IN' denied
+client @0x7f2528001630 10.255.200.198#55497: update '200.255.10.in-addr.arpa/IN' denied
+trust-anchor-telemetry '_ta-4f66/IN' from 10.255.200.254
+managed-keys-zone: Key 20326 for zone . acceptance timer complete: key now trusted
+received control channel command 'reload'
+loading configuration from '/etc/named.conf'
+reading built-in trust anchors from file '/etc/named.iscdlv.key'
+initializing GeoIP Country (IPv4) (type 1) DB
+GEO-106FREE 20180327 Build 1 Copyright (c) 2018 MaxMind Inc All Rights Reserved
+initializing GeoIP Country (IPv6) (type 12) DB
+GEO-106FREE 20180605 Build 1 Copyright (c) 2018 MaxMind Inc All Rights Reserved
+GeoIP City (IPv4) (type 2) DB not available
+GeoIP City (IPv4) (type 6) DB not available
+GeoIP City (IPv6) (type 30) DB not available
+GeoIP City (IPv6) (type 31) DB not available
+GeoIP Region (type 3) DB not available
+GeoIP Region (type 7) DB not available
+GeoIP ISP (type 4) DB not available
+GeoIP Org (type 5) DB not available
+GeoIP AS (type 9) DB not available
+GeoIP Domain (type 11) DB not available
+GeoIP NetSpeed (type 10) DB not available
+using default UDP/IPv4 port range: [32768, 60999]
+sizing zone task pool based on 10 zones
+zone 'core.local' allows unsigned updates from remote hosts, which is insecure
+none:104: 'max-cache-size 90%' - setting to 5224MB (out of 5805MB)
+automatic empty zone: 10.IN-ADDR.ARPA
+automatic empty zone: 16.172.IN-ADDR.ARPA
+automatic empty zone: 17.172.IN-ADDR.ARPA
+automatic empty zone: 18.172.IN-ADDR.ARPA
+automatic empty zone: 19.172.IN-ADDR.ARPA
+automatic empty zone: 20.172.IN-ADDR.ARPA
+automatic empty zone: 21.172.IN-ADDR.ARPA
+automatic empty zone: 22.172.IN-ADDR.ARPA
+automatic empty zone: 23.172.IN-ADDR.ARPA
+automatic empty zone: 24.172.IN-ADDR.ARPA
+automatic empty zone: 25.172.IN-ADDR.ARPA
+automatic empty zone: 26.172.IN-ADDR.ARPA
+automatic empty zone: 27.172.IN-ADDR.ARPA
+automatic empty zone: 28.172.IN-ADDR.ARPA
+automatic empty zone: 29.172.IN-ADDR.ARPA
+automatic empty zone: 30.172.IN-ADDR.ARPA
+automatic empty zone: 31.172.IN-ADDR.ARPA
+automatic empty zone: 168.192.IN-ADDR.ARPA
+automatic empty zone: 64.100.IN-ADDR.ARPA
+automatic empty zone: 65.100.IN-ADDR.ARPA
+automatic empty zone: 66.100.IN-ADDR.ARPA
+automatic empty zone: 67.100.IN-ADDR.ARPA
+automatic empty zone: 68.100.IN-ADDR.ARPA
+automatic empty zone: 69.100.IN-ADDR.ARPA
+automatic empty zone: 70.100.IN-ADDR.ARPA
+automatic empty zone: 71.100.IN-ADDR.ARPA
+automatic empty zone: 72.100.IN-ADDR.ARPA
+automatic empty zone: 73.100.IN-ADDR.ARPA
+automatic empty zone: 74.100.IN-ADDR.ARPA
+automatic empty zone: 75.100.IN-ADDR.ARPA
+automatic empty zone: 76.100.IN-ADDR.ARPA
+automatic empty zone: 77.100.IN-ADDR.ARPA
+automatic empty zone: 78.100.IN-ADDR.ARPA
+automatic empty zone: 79.100.IN-ADDR.ARPA
+automatic empty zone: 80.100.IN-ADDR.ARPA
+automatic empty zone: 81.100.IN-ADDR.ARPA
+automatic empty zone: 82.100.IN-ADDR.ARPA
+automatic empty zone: 83.100.IN-ADDR.ARPA
+automatic empty zone: 84.100.IN-ADDR.ARPA
+automatic empty zone: 85.100.IN-ADDR.ARPA
+automatic empty zone: 86.100.IN-ADDR.ARPA
+automatic empty zone: 87.100.IN-ADDR.ARPA
+automatic empty zone: 88.100.IN-ADDR.ARPA
+automatic empty zone: 89.100.IN-ADDR.ARPA
+automatic empty zone: 90.100.IN-ADDR.ARPA
+automatic empty zone: 91.100.IN-ADDR.ARPA
+automatic empty zone: 92.100.IN-ADDR.ARPA
+automatic empty zone: 93.100.IN-ADDR.ARPA
+automatic empty zone: 94.100.IN-ADDR.ARPA
+automatic empty zone: 95.100.IN-ADDR.ARPA
+automatic empty zone: 96.100.IN-ADDR.ARPA
+automatic empty zone: 97.100.IN-ADDR.ARPA
+automatic empty zone: 98.100.IN-ADDR.ARPA
+automatic empty zone: 99.100.IN-ADDR.ARPA
+automatic empty zone: 100.100.IN-ADDR.ARPA
+automatic empty zone: 101.100.IN-ADDR.ARPA
+automatic empty zone: 102.100.IN-ADDR.ARPA
+automatic empty zone: 103.100.IN-ADDR.ARPA
+automatic empty zone: 104.100.IN-ADDR.ARPA
+automatic empty zone: 105.100.IN-ADDR.ARPA
+automatic empty zone: 106.100.IN-ADDR.ARPA
+automatic empty zone: 107.100.IN-ADDR.ARPA
+automatic empty zone: 108.100.IN-ADDR.ARPA
+automatic empty zone: 109.100.IN-ADDR.ARPA
+automatic empty zone: 110.100.IN-ADDR.ARPA
+automatic empty zone: 111.100.IN-ADDR.ARPA
+automatic empty zone: 112.100.IN-ADDR.ARPA
+automatic empty zone: 113.100.IN-ADDR.ARPA
+automatic empty zone: 114.100.IN-ADDR.ARPA
+automatic empty zone: 115.100.IN-ADDR.ARPA
+automatic empty zone: 116.100.IN-ADDR.ARPA
+automatic empty zone: 117.100.IN-ADDR.ARPA
+automatic empty zone: 118.100.IN-ADDR.ARPA
+automatic empty zone: 119.100.IN-ADDR.ARPA
+automatic empty zone: 120.100.IN-ADDR.ARPA
+automatic empty zone: 121.100.IN-ADDR.ARPA
+automatic empty zone: 122.100.IN-ADDR.ARPA
+automatic empty zone: 123.100.IN-ADDR.ARPA
+automatic empty zone: 124.100.IN-ADDR.ARPA
+automatic empty zone: 125.100.IN-ADDR.ARPA
+automatic empty zone: 126.100.IN-ADDR.ARPA
+automatic empty zone: 127.100.IN-ADDR.ARPA
+automatic empty zone: 127.IN-ADDR.ARPA
+automatic empty zone: 254.169.IN-ADDR.ARPA
+automatic empty zone: 2.0.192.IN-ADDR.ARPA
+automatic empty zone: 100.51.198.IN-ADDR.ARPA
+automatic empty zone: 113.0.203.IN-ADDR.ARPA
+automatic empty zone: 255.255.255.255.IN-ADDR.ARPA
+automatic empty zone: 0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.IP6.ARPA
+automatic empty zone: D.F.IP6.ARPA
+automatic empty zone: 8.E.F.IP6.ARPA
+automatic empty zone: 9.E.F.IP6.ARPA
+automatic empty zone: A.E.F.IP6.ARPA
+automatic empty zone: B.E.F.IP6.ARPA
+automatic empty zone: 8.B.D.0.1.0.0.2.IP6.ARPA
+automatic empty zone: EMPTY.AS112.ARPA
+automatic empty zone: HOME.ARPA
+none:104: 'max-cache-size 90%' - setting to 5224MB (out of 5805MB)
+configuring command channel from '/etc/rndc.key'

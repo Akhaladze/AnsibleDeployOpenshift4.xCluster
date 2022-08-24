@@ -1,0 +1,14 @@
+---
+- hosts: 10.255.200.5
+  gather_facts: no
+  tasks:
+    - name: Replacing string
+      become: yes
+      replace:
+       path: /etc/haproxy/haproxy.cfg.bak
+       regexp: '#    server      bootstrap0 192.168.255.10:{{ item.port }} check'
+       replace: '    server      bootstrap0 192.168.255.10:{{ item.port }} check'
+      delegate_to: 10.255.200.5
+      with_items:
+      - { port: 6443 }
+      - { port: 22623 }
